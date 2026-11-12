@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#efeeea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fitness">
+<title>Fitness</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23efeeea'/%3E%3Crect x='5' y='5' width='9' height='9' rx='2' fill='%232da44e'/%3E%3Crect x='18' y='5' width='9' height='9' rx='2' fill='%23c9c8c3'/%3E%3Crect x='5' y='18' width='9' height='9' rx='2' fill='%23c9c8c3'/%3E%3Crect x='18' y='18' width='9' height='9' rx='2' fill='%232da44e'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#efeeea;--ink:#111110;--txt:#3b3a37;--mute:#7c7b77;--rule:#8f8e8a;--soft:#c9c8c3;--chip:#e1e0db;--green:#2da44e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+button{font:inherit;color:inherit}
+svg{fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.wrap{max-width:680px;margin:0 auto;padding:0 24px calc(48px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;justify-content:space-between;height:calc(68px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}
+header h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
+.ib{width:40px;height:40px;display:grid;place-items:center;border:0;background:none;padding:0;cursor:pointer;border-radius:2px;color:var(--ink)}
+.ib svg{width:22px;height:22px}
+.ib.sm{width:34px;height:34px;color:var(--soft)}
+.ib.sm svg{width:16px;height:16px}
+.ib.sm:hover{color:var(--mute)}
+.ib.armed{color:#b3261e}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ink);transition:background .2s}
+.dot.local{background:none;border:1.4px solid var(--mute)}
+.dot.busy{background:var(--soft);animation:p 1s infinite alternate}
+.dot.err{background:#b3261e}
+@keyframes p{to{opacity:.3}}
+.stats{display:flex;gap:28px;margin:18px 0 22px}
+.stats b{display:block;font-size:clamp(30px,8.6vw,40px);font-weight:700;letter-spacing:-.028em;line-height:1.05}
+.stats span{font-size:14px;color:var(--mute)}
+.hm{overflow-x:auto;padding:2px 2px 12px;margin:0 -2px;scrollbar-width:none}
+.hm::-webkit-scrollbar{display:none}
+.hg{display:grid;grid-auto-flow:column;grid-template-rows:16px repeat(7,14px);grid-auto-columns:14px;gap:3px;width:max-content}
+.hl{font-size:11px;color:var(--mute);white-space:nowrap;overflow:visible;line-height:14px}
+.c{all:unset;width:14px;height:14px;border-radius:3px;background:var(--chip);cursor:pointer}
+.c.on{background:var(--green)}
+.c.t{box-shadow:inset 0 0 0 1.4px var(--rule)}
+.c.on.t{box-shadow:inset 0 0 0 1.4px #1a7f37}
+.c.s{outline:1.6px solid var(--ink);outline-offset:1px}
+.c.f{visibility:hidden}
+.day{border-top:1px solid var(--rule);margin-top:14px}
+.dh{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px}
+.dh .name{font-size:clamp(26px,7.4vw,34px);font-weight:700;letter-spacing:-.025em;line-height:1.05}
+.dh .nav{display:flex;margin-right:-9px}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:20px;line-height:1.3;color:var(--txt)}
+.rows .n{flex:1;min-width:0;overflow-wrap:anywhere}
+.rows .s{font-size:15px;color:var(--mute);white-space:nowrap}
+.rows .ib{margin-right:-9px}
+.add{display:flex;align-items:center;gap:8px;padding:6px 0;color:var(--soft)}
+.add svg{width:18px;height:18px;flex:none}
+.add input{all:unset;font-size:20px;line-height:1.3;color:var(--ink);min-width:0}
+.add input::placeholder{color:var(--soft)}
+.add #nm{flex:1}
+.add #st{width:58px;text-align:right}
+.add:focus-within{color:var(--mute)}
+.go{all:unset;font-size:15px;padding:6px 12px;border-radius:16px;border:1.2px solid var(--ink);cursor:pointer;color:var(--ink);white-space:nowrap}
+.hist{margin-top:44px}
+.hist h2{font-size:14px;font-weight:500;color:var(--mute);margin:0 0 6px}
+.hd{border-top:1px solid var(--soft);padding:10px 0 8px}
+.hd button{all:unset;cursor:pointer;font-size:17px;font-weight:700;letter-spacing:-.01em;display:flex;justify-content:space-between;width:100%}
+.hd button span{font-weight:400;font-size:14px;color:var(--mute)}
+.hd p{margin:4px 0 0;font-size:16px;line-height:1.45;color:var(--txt)}
+.empty{font-size:16px;color:var(--mute);padding:6px 0}
+.key{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--rule);padding:14px 0;margin-top:20px}
+.key input{all:unset;flex:1;min-width:0;font-size:20px}
+.key.bad{border-bottom-color:#b3261e;animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.key>svg{width:22px;height:22px;color:var(--mute);flex:none}
+.hint{font-size:15px;line-height:1.45;color:var(--mute);margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header id="hd"></header>
+  <main id="app"></main>
+</div>
+<script>
+/* ---------- config ---------- */
+const CFG = { owner: 'farzadbayan', repo: 'fitness-data', path: 'workouts.json' };
+const WEEKS = 53;
+
+const I = {
+  plus:  '<svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>',
+  x:     '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  prev:  '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+  next:  '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
+  key:   '<svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l2.5 2.5M14 9l2 2"/></svg>',
+};
+
+/* ---------- storage ---------- */
+const ls = (k, v) => v === undefined ? localStorage.getItem('fit.' + k) : localStorage.setItem('fit.' + k, v);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const DEFAULT = () => ({ v: 1, entries: [], deleted: [] });
+const fix = s => { if (!s || typeof s !== 'object') s = DEFAULT(); if (!Array.isArray(s.entries)) s.entries = []; if (!Array.isArray(s.deleted)) s.deleted = []; s.v = s.v || 1; return s; };
+
+let state; try { state = JSON.parse(ls('state')) } catch (e) {} state = fix(state);
+let token = ls('token') || '';
+let sha = ls('sha') || null;
+let dirty = ls('dirty') === '1';
+let status = token ? 'ok' : 'local';
+let keyView = false;
+const ser = () => JSON.stringify(state, null, 1);
+
+/* ---------- dates ---------- */
+const p2 = n => String(n).padStart(2, '0');
+const iso = d => d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+const pd = s => { const a = s.split('-').map(Number); return new Date(a[0], a[1] - 1, a[2]); };
+const okDate = s => /^\d{4}-\d{2}-\d{2}$/.test(s || '') && iso(pd(s)) === s;
+const shift = (s, n) => { const d = pd(s); d.setDate(d.getDate() + n); return iso(d); };
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const today = () => iso(new Date());
+function label(s) {
+  const t = today();
+  if (s === t) return 'Today';
+  if (s === shift(t, -1)) return 'Yesterday';
+  const d = pd(s);
+  return WD[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
+}
+let sel = today();
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const setsTxt = n => n ? n + (n === 1 ? ' set' : ' sets') : '';
+
+function save(delay = 700) {
+  ls('state', ser()); dirty = true; ls('dirty', '1');
+  schedule(delay);
+}
+
+/* ---------- GitHub sync ---------- */
+const enc = s => { const b = new TextEncoder().encode(s); let o = ''; for (let i = 0; i < b.length; i += 0x8000) o += String.fromCharCode(...b.subarray(i, i + 0x8000)); return btoa(o); };
+const dec = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, '')), c => c.charCodeAt(0)));
+const API = `https://api.github.com/repos/${CFG.owner}/${CFG.repo}/`;
+const gh = (method, body, p = 'contents/' + CFG.path) =>
+  fetch(API + p, {
+    method, cache: 'no-store',
+    headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+let timer, busy = false, again = false;
+const oldShas = new Set(JSON.parse(ls('old') || '[]'));
+function retire(x) { if (!x) return; oldShas.add(x); ls('old', JSON.stringify([...oldShas].slice(-50))); }
+function setStatus(s) { status = s; const d = document.querySelector('.dot'); if (d) d.className = 'dot ' + s; }
+function schedule(delay) {
+  if (!token) return setStatus('local');
+  clearTimeout(timer); timer = setTimeout(push, delay);
+}
+function mergeRemote(rem) {
+  rem = fix(rem);
+  const del = new Set([...state.deleted, ...rem.deleted]);
+  const mine = new Set(state.entries.map(e => e.id));
+  rem.entries.forEach(e => { if (!mine.has(e.id)) state.entries.push(e); });
+  state.entries = state.entries.filter(e => !del.has(e.id));
+  state.deleted = [...del].slice(-500);
+}
+async function push(retry = 2) {
+  if (!token) return;
+  if (busy) { again = true; return; }
+  busy = true; setStatus('busy');
+  let ok = false;
+  try {
+    const snap = ser();
+    const r = await gh('PUT', { message: 'workouts', content: enc(snap), ...(sha ? { sha } : {}) });
+    if (r.ok) {
+      retire(sha); sha = (await r.json()).content.sha; ls('sha', sha); ok = true;
+      if (ser() === snap) { dirty = false; ls('dirty', '0'); flushInbox(); }
+    } else if (retry && (r.status === 409 || r.status === 422 || r.status === 404)) {
+      const g = await gh('GET');
+      if (g.ok) {
+        const j = await g.json(); sha = j.sha;
+        try { mergeRemote(JSON.parse(dec(j.content))); ls('state', ser()); render(); } catch (e) {}
+      }
+      else if (g.status === 404) sha = null;
+      busy = false; return push(retry - 1);
+    }
+  } catch (e) {}
+  busy = false;
+  setStatus(ok ? 'ok' : 'err');
+  if (again || (ok && dirty)) { again = false; schedule(400); }
+}
+async function pull() { await pullMain(); checkInbox(); }
+async function pullMain() {
+  if (!token || busy) return;
+  if (dirty) return push();
+  busy = true; setStatus('busy');
+  let ok = false;
+  try {
+    const r = await gh('GET');
+    if (r.status === 404) { sha = null; busy = false; dirty = true; return push(); }
+    if (r.ok) {
+      const j = await r.json(); ok = true;
+      if (oldShas.has(j.sha) || j.sha === sha) { busy = false; setStatus('ok'); return; }
+      sha = j.sha; ls('sha', sha);
+      const txt = dec(j.content);
+      if (!dirty && txt !== ser()) { state = fix(JSON.parse(txt)); ls('state', ser()); render(); }
+    }
+  } catch (e) {}
+  busy = false; setStatus(ok ? 'ok' : 'err');
+}
+
+/* ---------- inbox: workouts dropped as files in fitness-data/inbox/*.json ---------- */
+let inboxBusy = false; const toDelete = [];
+const rawUrl = path => API + 'contents/' + path.split('/').map(encodeURIComponent).join('/');
+async function checkInbox() {
+  if (!token || inboxBusy) return; inboxBusy = true;
+  try {
+    const r = await gh('GET', null, 'contents/inbox'); if (!r.ok) return;
+    const list = (await r.json()).filter(f => f.type === 'file' && /\.json$/i.test(f.name));
+    let added = 0;
+    for (const f of list) {
+      const base = 'ib' + f.name.replace(/\.json$/i, '').replace(/[^\w-]/g, '').slice(0, 40);
+      const raw = await fetch(rawUrl(f.path), { cache: 'no-store', headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github.raw' } });
+      if (!raw.ok) continue;
+      let d; try { d = JSON.parse(await raw.text()); } catch (e) { d = null; }
+      if (d) {
+        const date = okDate(d.date) ? d.date : today();
+        const items = Array.isArray(d.workouts) ? d.workouts : [d];
+        items.forEach((w, i) => {
+          const id = base + '-' + i, name = String((w && (w.name || w.workout || w.exercise)) || '').trim();
+          if (!name || state.entries.some(e => e.id === id) || state.deleted.includes(id)) return;
+          const sets = parseInt(w.sets, 10);
+          state.entries.push({ id, date: okDate(w.date) ? w.date : date, name, sets: sets > 0 ? sets : null, created: Date.now() });
+          added++;
+        });
+      }
+      if (!toDelete.some(x => x.path === f.path)) toDelete.push({ path: f.path, sha: f.sha });
+    }
+    if (added) { save(200); render(); } else flushInbox();
+  } catch (e) {} finally { inboxBusy = false; }
+}
+function flushInbox() {
+  while (toDelete.length) {
+    const f = toDelete.shift();
+    fetch(rawUrl(f.path), { method: 'DELETE', headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' }, body: JSON.stringify({ message: 'inbox processed', sha: f.sha }) }).catch(() => {});
+  }
+}
+
+/* ---------- render ---------- */
+const hd = document.getElementById('hd'), app = document.getElementById('app');
+const byDay = () => { const m = {}; state.entries.forEach(e => (m[e.date] = m[e.date] || []).push(e)); return m; };
+
+function heatmap(days) {
+  const t = today(), end = pd(t);
+  const start = new Date(end); start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - (WEEKS - 1) * 7);
+  let h = '', d = new Date(start), lastM = -1;
+  for (let w = 0; w < WEEKS; w++) {
+    let cells = '', lab = '';
+    for (let i = 0; i < 7; i++) {
+      const s = iso(d);
+      if (d.getDate() <= 7 && i === 0 && d.getMonth() !== lastM) { lab = MON[d.getMonth()]; lastM = d.getMonth(); }
+      const n = (days[s] || []).length;
+      cells += s > t ? '<span class="c f"></span>'
+        : `<button class="c${n ? ' on' : ''}${s === t ? ' t' : ''}${s === sel ? ' s' : ''}" data-act="day" data-d="${s}" title="${label(s)}${n ? ': ' + n + (n === 1 ? ' workout' : ' workouts') : ''}" aria-label="${label(s)}"></button>`;
+      d.setDate(d.getDate() + 1);
+    }
+    h += `<span class="hl">${lab}</span>` + cells;
+  }
+  return `<div class="hm" id="hm"><div class="hg">${h}</div></div>`;
+}
+
+function stats(days) {
+  const t = today(), y = t.slice(0, 4), keys = Object.keys(days);
+  const mon = shift(t, -((pd(t).getDay() + 6) % 7));
+  const week = keys.filter(k => k >= mon && k <= t).length;
+  const year = keys.filter(k => k.slice(0, 4) === y).length;
+  return `<div class="stats"><div><b>${week}</b><span>this week</span></div><div><b>${year}</b><span>days in ${y}</span></div><div><b>${keys.length}</b><span>days total</span></div></div>`;
+}
+
+let rendering = false;
+function render() {
+  rendering = true;
+  hd.innerHTML = `<h1>Fitness</h1><button class="ib" data-act="key" aria-label="Sync"><span class="dot ${status}"></span></button>`;
+  if (keyView) {
+    app.innerHTML = `<div class="key">${I.key}<input id="tok" type="password" placeholder="GitHub token" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <p class="hint">Paste a GitHub token that can read and write <b>${CFG.owner}/${CFG.repo}</b> (Contents: read and write), then press Enter. It is stored only in this browser.${token ? ' A token is already saved; paste a new one to replace it.' : ''}</p>
+      <p class="hint"><button class="go" data-act="closekey">${token ? 'Back' : 'Use without sync'}</button></p>`;
+    rendering = false; const el = document.getElementById('tok'); el && el.focus(); return;
+  }
+  const keep = { nm: (document.getElementById('nm') || {}).value || '', st: (document.getElementById('st') || {}).value || '', f: document.activeElement && document.activeElement.id };
+  const sx = (document.getElementById('hm') || {}).scrollLeft;
+  const days = byDay(), list = days[sel] || [];
+  const names = [...new Set(state.entries.map(e => e.name))].sort();
+  const dates = Object.keys(days).sort().reverse();
+  app.innerHTML = stats(days) + heatmap(days) +
+    `<section class="day"><div class="dh"><span class="name">${label(sel)}</span><span class="nav"><button class="ib" data-act="mv" data-n="-1" aria-label="Previous day">${I.prev}</button><button class="ib" data-act="mv" data-n="1" aria-label="Next day"${sel >= today() ? ' disabled style="opacity:.25"' : ''}>${I.next}</button></span></div>
+      <ul class="rows">${list.map(e => `<li><span class="n">${esc(e.name)}</span><span class="s">${setsTxt(e.sets)}</span><button class="ib sm" data-act="del" data-id="${esc(e.id)}" aria-label="Delete">${I.x}</button></li>`).join('')}</ul>
+      <div class="add">${I.plus}<input id="nm" list="names" placeholder="Workout" autocomplete="off" enterkeyhint="next"><input id="st" inputmode="numeric" pattern="[0-9]*" placeholder="sets" autocomplete="off" enterkeyhint="done"><button class="go" data-act="add">Add</button></div>
+      <datalist id="names">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+    </section>
+    <section class="hist"><h2>History</h2>${dates.length ? dates.map(k => `<div class="hd"><button data-act="day" data-d="${k}">${label(k)}<span>${days[k].length} ${days[k].length === 1 ? 'workout' : 'workouts'}</span></button><p>${days[k].map(e => esc(e.name) + (e.sets ? ' × ' + e.sets : '')).join(', ')}</p></div>`).join('') : '<div class="empty">No workouts logged yet.</div>'}</section>`;
+  const nm = document.getElementById('nm'), st = document.getElementById('st'), hm = document.getElementById('hm');
+  nm.value = keep.nm; st.value = keep.st;
+  if (keep.f === 'nm') nm.focus(); else if (keep.f === 'st') st.focus();
+  hm.scrollLeft = sx === undefined ? hm.scrollWidth : sx;
+  rendering = false;
+}
+
+/* ---------- actions ---------- */
+function addEntry() {
+  const nm = document.getElementById('nm'), st = document.getElementById('st'); if (!nm) return;
+  const name = nm.value.trim().replace(/\s+/g, ' ');
+  if (!name) { nm.focus(); return; }
+  const sets = parseInt(st.value, 10);
+  state.entries.push({ id: uid(), date: sel, name, sets: sets > 0 ? sets : null, created: Date.now() });
+  nm.value = ''; st.value = '';
+  save(300); render(); document.getElementById('nm').focus();
+}
+let armTimer;
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act;
+  if (act === 'day') { sel = b.dataset.d; render(); if (!b.classList.contains('c')) window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  else if (act === 'mv') { const n = shift(sel, +b.dataset.n); if (n <= today()) { sel = n; render(); } }
+  else if (act === 'add') addEntry();
+  else if (act === 'del') {
+    if (!b.classList.contains('armed')) { b.classList.add('armed'); clearTimeout(armTimer); armTimer = setTimeout(() => b.classList.remove('armed'), 2500); return; }
+    const id = b.dataset.id;
+    state.entries = state.entries.filter(x => x.id !== id);
+    state.deleted = [...state.deleted, id].slice(-500);
+    save(300); render();
+  }
+  else if (act === 'key') { keyView = !keyView; render(); }
+  else if (act === 'closekey') { keyView = false; render(); }
+});
+async function saveKey() {
+  const el = document.getElementById('tok'); if (!el) return; const v = el.value.trim(); if (!v) return;
+  el.disabled = true;
+  let ok = false;
+  try { ok = (await fetch(API.slice(0, -1), { cache: 'no-store', headers: { Authorization: 'Bearer ' + v, Accept: 'application/vnd.github+json' } })).ok; } catch (e) {}
+  if (!ok) { el.disabled = false; el.value = ''; el.parentNode.classList.add('bad'); setTimeout(() => el.parentNode.classList.remove('bad'), 600); el.focus(); return; }
+  token = v; ls('token', token); sha = null; ls('sha', ''); status = 'ok'; keyView = false; render();
+  if (state.entries.length) { dirty = true; push(); } else pull();
+}
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing) return;
+  const el = e.target;
+  if (el.id === 'tok') saveKey();
+  else if (el.id === 'nm') { e.preventDefault(); if (el.value.trim()) document.getElementById('st').focus(); }
+  else if (el.id === 'st') { e.preventDefault(); addEntry(); }
+});
+
+/* ---------- start ---------- */
+if (location.hash.startsWith('#key=')) { token = decodeURIComponent(location.hash.slice(5)).trim(); ls('token', token); status = 'ok'; history.replaceState(null, '', location.pathname); }
+if (!token && !state.entries.length) keyView = true;
+render();
+if (dirty) schedule(300); else pull();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (sel > today()) sel = today(); pull(); } });
+</script>
+</body>
+</html>
