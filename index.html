@@ -86,6 +86,7 @@ header h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
 <script>
 /* ---------- config ---------- */
 const CFG = { owner: 'farzadbayan', repo: 'fitness-data', path: 'workouts.json' };
+const LOCK = null;
 const WEEKS = 53;
 
 const I = {
@@ -281,8 +282,7 @@ function render() {
   rendering = true;
   hd.innerHTML = `<h1>Fitness</h1><button class="ib" data-act="key" aria-label="Sync"><span class="dot ${status}"></span></button>`;
   if (keyView) {
-    app.innerHTML = `<div class="key">${I.key}<input id="tok" type="password" placeholder="GitHub token" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
-      <p class="hint">Paste a GitHub token that can read and write <b>${CFG.owner}/${CFG.repo}</b> (Contents: read and write), then press Enter. It is stored only in this browser.${token ? ' A token is already saved; paste a new one to replace it.' : ''}</p>
+    app.innerHTML = `<div class="key">${I.key}<input id="tok" type="password" placeholder="Password" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"></div>
       <p class="hint"><button class="go" data-act="closekey">${token ? 'Back' : 'Use without sync'}</button></p>`;
     rendering = false; const el = document.getElementById('tok'); el && el.focus(); return;
   }
@@ -332,12 +332,22 @@ document.addEventListener('click', e => {
   else if (act === 'key') { keyView = !keyView; render(); }
   else if (act === 'closekey') { keyView = false; render(); }
 });
-async function saveKey() {
-  const el = document.getElementById('tok'); if (!el) return; const v = el.value.trim(); if (!v) return;
-  el.disabled = true;
-  let ok = false;
-  try { ok = (await fetch(API.slice(0, -1), { cache: 'no-store', headers: { Authorization: 'Bearer ' + v, Accept: 'application/vnd.github+json' } })).ok; } catch (e) {}
-  if (!ok) { el.disabled = false; el.value = ''; el.parentNode.classList.add('bad'); setTimeout(() => el.parentNode.classList.remove('bad'), 600); el.focus(); return; }
+async function unlock(pw) {
+  const u = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  const k = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: u(LOCK.s), iterations: LOCK.i, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+  return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: u(LOCK.v) }, k, u(LOCK.c)));
+}
+let autoT;
+async function saveKey(silent) {
+  const el = document.getElementById('tok'); if (!el) return; const pw = el.value.trim(); if (!pw) return;
+  if (!silent) el.disabled = true;
+  let v;
+  try { v = await unlock(pw); } catch (e) {
+    if (silent) return;
+    el.disabled = false; el.value = ''; el.parentNode.classList.add('bad'); setTimeout(() => el.parentNode.classList.remove('bad'), 600); el.focus(); return;
+  }
+  if (el.value.trim() !== pw || !keyView) return;
   token = v; ls('token', token); sha = null; ls('sha', ''); status = 'ok'; keyView = false; render();
   if (state.entries.length) { dirty = true; push(); } else pull();
 }
@@ -347,6 +357,11 @@ document.addEventListener('keydown', e => {
   if (el.id === 'tok') saveKey();
   else if (el.id === 'nm') { e.preventDefault(); if (el.value.trim()) document.getElementById('st').focus(); }
   else if (el.id === 'st') { e.preventDefault(); addEntry(); }
+});
+
+document.addEventListener('input', e => {
+  if (e.target.id !== 'tok') return;
+  clearTimeout(autoT); if (e.target.value.trim().length >= 6) autoT = setTimeout(() => saveKey(true), 350);
 });
 
 /* ---------- start ---------- */
