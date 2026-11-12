@@ -283,7 +283,7 @@ function render() {
   hd.innerHTML = `<h1>Fitness</h1><button class="ib" data-act="key" aria-label="Sync"><span class="dot ${status}"></span></button>`;
   if (keyView) {
     app.innerHTML = `<div class="key">${I.key}<input id="tok" type="password" placeholder="Password" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"></div>
-      <p class="hint"><button class="go" data-act="closekey">${token ? 'Back' : 'Use without sync'}</button></p>`;
+      ${token ? '<p class="hint"><button class="go" data-act="closekey">Back</button></p>' : ''}`;
     rendering = false; const el = document.getElementById('tok'); el && el.focus(); return;
   }
   const keep = { nm: (document.getElementById('nm') || {}).value || '', st: (document.getElementById('st') || {}).value || '', f: document.activeElement && document.activeElement.id };
@@ -329,7 +329,7 @@ document.addEventListener('click', e => {
     state.deleted = [...state.deleted, id].slice(-500);
     save(300); render();
   }
-  else if (act === 'key') { keyView = !keyView; render(); }
+  else if (act === 'key') { keyView = token ? !keyView : true; render(); }
   else if (act === 'closekey') { keyView = false; render(); }
 });
 async function unlock(pw) {
@@ -366,7 +366,7 @@ document.addEventListener('input', e => {
 
 /* ---------- start ---------- */
 if (location.hash.startsWith('#key=')) { token = decodeURIComponent(location.hash.slice(5)).trim(); ls('token', token); status = 'ok'; history.replaceState(null, '', location.pathname); }
-if (!token && !state.entries.length) keyView = true;
+if (!token) keyView = true;
 render();
 if (dirty) schedule(300); else pull();
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (sel > today()) sel = today(); pull(); } });
